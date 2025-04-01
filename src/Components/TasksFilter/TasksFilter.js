@@ -1,5 +1,5 @@
-import './TasksFilter.css';
-import PropTypes from 'prop-types';
+import './TasksFilter.css'
+import PropTypes from 'prop-types'
 
 function TasksFilter({ onFilterChange }) {
   return (
@@ -14,15 +14,15 @@ function TasksFilter({ onFilterChange }) {
         <button onClick={() => onFilterChange('Completed')}>Completed</button>
       </li>
     </ul>
-  );
+  )
 }
 
 TasksFilter.defaultProps = {
-  onFilterChange: () => {}
-};
+  onFilterChange: () => {},
+}
 
 TasksFilter.propTypes = {
-  onFilterChange: PropTypes.func
-};
+  onFilterChange: PropTypes.func,
+}
 
-export default TasksFilter;
+export default TasksFilter

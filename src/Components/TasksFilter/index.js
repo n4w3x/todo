@@ -1,3 +1,3 @@
-import TaskList from "./TasksFilter";
+import TaskList from './TasksFilter'
 
-export default TaskList;
+export default TaskList

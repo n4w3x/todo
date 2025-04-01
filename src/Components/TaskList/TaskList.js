@@ -1,6 +1,7 @@
-import Task from "../Task";
-import "./TaskList.css";
-import PropTypes from "prop-types";
+import './TaskList.css'
+import PropTypes from 'prop-types'
+
+import Task from '../Task'
 
 function TaskList({ tasks, onDeleted, onToggleDone, onEditItem }) {
   return (
@@ -17,7 +18,7 @@ function TaskList({ tasks, onDeleted, onToggleDone, onEditItem }) {
         </li>
       ))}
     </ul>
-  );
+  )
 }
 
 TaskList.defaultProps = {
@@ -25,13 +26,13 @@ TaskList.defaultProps = {
   onDeleted: () => {},
   onToggleDone: () => {},
   onEditItem: () => {},
-};
+}
 
 TaskList.propTypes = {
   tasks: PropTypes.arrayOf(PropTypes.object),
   onDeleted: PropTypes.func,
   onToggleDone: PropTypes.func,
   onEditItem: PropTypes.func,
-};
+}
 
-export default TaskList;
+export default TaskList

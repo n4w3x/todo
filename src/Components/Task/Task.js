@@ -51,17 +51,11 @@ export default class Task extends Component {
 
           <label>
             {isEditing ? (
-              <input
-                type="text"
-                value={newDescription}
-                onChange={this.handleChange}
-                onBlur={this.handleBlur}
-                autoFocus
-              />
+              <input type="text" value={newDescription} onChange={this.handleChange} onBlur={this.handleBlur} />
             ) : (
-              <span className={classNames} onClick={onToggleDone}>
+              <button className={classNames} onClick={onToggleDone}>
                 {description}
-              </span>
+              </button>
             )}
 
             <span className="created">created {distanceToNow} ago</span>
