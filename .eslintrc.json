@@ -21,10 +21,9 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": ["react", "prettier", "import"],
+  "plugins": ["react", "import"],
   "rules": {
     "indent": ["error", 2],
-    "prettier/prettier": "error",
     "no-underscore-dangle": 0,
     "react/no-unused-state": 0,
     "no-unused-vars": 0,
