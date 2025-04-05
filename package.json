@@ -22,12 +22,6 @@
     "lint-fix": "npm run lint -- --fix",
     "prepare": "husky install"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -45,7 +39,6 @@
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.2.0",
     "husky": "^8.0.3",
@@ -54,7 +47,7 @@
   },
   "lint-staged": {
     "**/*.{js,jsx}": [
-      "npm run lint",
+      "npm run lint -- --fix",
       "prettier --write"
     ]
   }
