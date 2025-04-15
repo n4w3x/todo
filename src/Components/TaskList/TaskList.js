@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 import Task from '../Task'
 
-function TaskList({ tasks, onDeleted, onToggleDone, onEditItem }) {
+function TaskList({ tasks, onDeleted, onToggleDone, onEditItem, onToggleTimer, formatTime }) {
   return (
     <ul className="todo-list">
       {tasks.map(({ id, ...taskProps }) => (
@@ -14,6 +14,8 @@ function TaskList({ tasks, onDeleted, onToggleDone, onEditItem }) {
             onDeleted={() => onDeleted(id)}
             onToggleDone={() => onToggleDone(id)}
             onEditItem={onEditItem}
+            onToggleTimer={() => onToggleTimer(id)}
+            formatTime={formatTime}
           />
         </li>
       ))}
@@ -26,6 +28,8 @@ TaskList.defaultProps = {
   onDeleted: () => {},
   onToggleDone: () => {},
   onEditItem: () => {},
+  onToggleTimer: () => {},
+  formatTime: () => '00:00',
 }
 
 TaskList.propTypes = {
@@ -33,6 +37,8 @@ TaskList.propTypes = {
   onDeleted: PropTypes.func,
   onToggleDone: PropTypes.func,
   onEditItem: PropTypes.func,
+  onToggleTimer: PropTypes.func,
+  formatTime: PropTypes.func,
 }
 
 export default TaskList

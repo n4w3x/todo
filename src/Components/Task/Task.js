@@ -33,8 +33,19 @@ export default class Task extends Component {
   }
 
   render() {
-    const { description, created, onDeleted, onToggleDone, done, id } = this.props
+    const {
+      description,
+      created,
+      onDeleted,
+      onToggleDone,
+      done,
+      isRunning,
+      onToggleTimer,
+      currentElapsed,
+      formatTime,
+    } = this.props
     const { isEditing, newDescription } = this.state
+
     const distanceToNow = formatDistanceToNow(new Date(created), {
       includeSeconds: true,
     })
@@ -43,7 +54,6 @@ export default class Task extends Component {
     if (done) {
       classNames += ' done'
     }
-
     return (
       <div className="task">
         <div className="view">
@@ -57,26 +67,30 @@ export default class Task extends Component {
                 {description}
               </button>
             )}
-
             <span className="created">created {distanceToNow} ago</span>
+            <span className="timer"> {formatTime(currentElapsed)}</span>
           </label>
+          <button className="icon icon-play" onClick={onToggleTimer}>
+            {isRunning ? '⏸' : '▶'}
+          </button>
 
           <button className="icon icon-edit" onClick={this.handleEditClick} />
-
           <button className="icon icon-destroy" onClick={onDeleted} />
         </div>
       </div>
     )
   }
 }
-
 Task.defaultProps = {
   done: false,
   onDeleted: () => {},
   onToggleDone: () => {},
   onEditItem: () => {},
+  onToggleTimer: () => {},
+  formatTime: () => '00:00',
+  isRunning: false,
+  currentElapsed: 0,
 }
-
 Task.propTypes = {
   id: PropTypes.number.isRequired,
   description: PropTypes.string.isRequired,
@@ -84,5 +98,8 @@ Task.propTypes = {
   onDeleted: PropTypes.func,
   onToggleDone: PropTypes.func,
   onEditItem: PropTypes.func,
-  done: PropTypes.bool,
+  onToggleTimer: PropTypes.func,
+  formatTime: PropTypes.func,
+  isRunning: PropTypes.bool,
+  currentElapsed: PropTypes.number,
 }

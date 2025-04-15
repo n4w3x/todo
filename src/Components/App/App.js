@@ -18,49 +18,60 @@ export default class App extends Component {
     filter: 'All',
   }
 
+  componentDidMount() {
+    this.timer = setInterval(this.updateRunningTimers, 1000)
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer)
+  }
+
+  updateRunningTimers = () => {
+    this.setState(({ tasks }) => {
+      const updatedTasks = tasks.map((task) => {
+        if (task.isRunning && task.lastStartTime) {
+          const now = Date.now()
+          const elapsed = Math.floor((now - task.lastStartTime) / 1000)
+          return {
+            ...task,
+            currentElapsed: task.timeElapsed + elapsed,
+          }
+        }
+        return task
+      })
+      return { tasks: updatedTasks }
+    })
+  }
+
   createTodoItem(text) {
     return {
       id: this.maxId++,
       description: text,
       created: new Date(),
       done: false,
+      timeElapsed: 0,
+      lastStartTime: null,
+      isRunning: false,
+      currentElapsed: 0,
     }
   }
 
   deleteItem = (id) => {
-    this.setState(({ tasks }) => {
-      const idx = tasks.findIndex((el) => el.id === id)
-
-      const newArray = [...tasks.slice(0, idx), ...tasks.slice(idx + 1)]
-
-      return {
-        tasks: newArray,
-      }
-    })
+    this.setState(({ tasks }) => ({
+      tasks: tasks.filter((el) => el.id !== id),
+    }))
   }
 
   addItem = (text) => {
     const newItem = this.createTodoItem(text)
-
-    this.setState(({ tasks }) => {
-      const newArr = [...tasks, newItem]
-      return {
-        tasks: newArr,
-      }
-    })
+    this.setState(({ tasks }) => ({
+      tasks: [...tasks, newItem],
+    }))
   }
 
   onToggleDone = (id) => {
-    this.setState(({ tasks }) => {
-      const idx = tasks.findIndex((el) => el.id === id)
-      const oldItem = tasks[idx]
-      const newItem = { ...oldItem, done: !oldItem.done }
-      const newArray = [...tasks.slice(0, idx), newItem, ...tasks.slice(idx + 1)]
-
-      return {
-        tasks: newArray,
-      }
-    })
+    this.setState(({ tasks }) => ({
+      tasks: tasks.map((el) => (el.id === id ? { ...el, done: !el.done } : el)),
+    }))
   }
 
   onFilterChange = (filter) => {
@@ -68,28 +79,46 @@ export default class App extends Component {
   }
 
   clearCompleted = () => {
-    this.setState(({ tasks }) => {
-      const filteredTasks = tasks.filter((task) => !task.done)
-      return {
-        tasks: filteredTasks,
-      }
-    })
+    this.setState(({ tasks }) => ({
+      tasks: tasks.filter((task) => !task.done),
+    }))
   }
 
   onEditItem = (id, newDescription) => {
-    this.setState(({ tasks }) => {
-      const idx = tasks.findIndex((el) => el.id === id)
-      const oldItem = tasks[idx]
-      const newItem = { ...oldItem, description: newDescription }
-
-      const newArray = [...tasks.slice(0, idx), newItem, ...tasks.slice(idx + 1)]
-
-      return {
-        tasks: newArray,
-      }
-    })
+    this.setState(({ tasks }) => ({
+      tasks: tasks.map((el) => (el.id === id ? { ...el, description: newDescription } : el)),
+    }))
   }
 
+  onToggleTimer = (id) => {
+    this.setState(({ tasks }) => ({
+      tasks: tasks.map((task) => {
+        if (task.id !== id) return task
+        if (task.isRunning) {
+          const now = Date.now()
+          const elapsed = Math.floor((now - task.lastStartTime) / 1000)
+          return {
+            ...task,
+            isRunning: false,
+            timeElapsed: task.timeElapsed + elapsed,
+            lastStartTime: null,
+            currentElapsed: task.timeElapsed + elapsed,
+          }
+        } else {
+          return {
+            ...task,
+            isRunning: true,
+            lastStartTime: Date.now(),
+          }
+        }
+      }),
+    }))
+  }
+  formatTime = (seconds) => {
+    const min = String(Math.floor(seconds / 60)).padStart(2, '0')
+    const sec = String(seconds % 60).padStart(2, '0')
+    return `${min}:${sec}`
+  }
   render() {
     const { tasks, filter } = this.state
     const doneCount = tasks.filter((task) => !task.done).length
@@ -100,7 +129,6 @@ export default class App extends Component {
       if (filter === 'Completed') return task.done
       return true
     })
-
     return (
       <section className="todoapp">
         <NewTaskForm onItemAdded={this.addItem} />
@@ -110,6 +138,8 @@ export default class App extends Component {
             onDeleted={this.deleteItem}
             onToggleDone={this.onToggleDone}
             onEditItem={this.onEditItem}
+            onToggleTimer={this.onToggleTimer}
+            formatTime={this.formatTime}
           />
           <Footer count={doneCount} onFilterChange={this.onFilterChange} clearCompleted={this.clearCompleted} />
         </section>
@@ -117,12 +147,10 @@ export default class App extends Component {
     )
   }
 }
-
 App.defaultProps = {
   tasks: [],
   filter: 'All',
 }
-
 App.propTypes = {
   tasks: PropTypes.arrayOf(PropTypes.object),
   filter: PropTypes.string,
