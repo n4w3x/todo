@@ -1,24 +1,37 @@
-import './TasksFilter.css'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 
-function TasksFilter({ onFilterChange }) {
+function TasksFilter({ onFilterChange = () => {} }) {
+  const [activeFilter, setActiveFilter] = useState({
+    All: true,
+    Active: false,
+    Completed: false,
+  })
+
+  const handleFilterClick = (e) => {
+    const selected = e.target.textContent
+
+    setActiveFilter(() => ({
+      All: false,
+      Active: false,
+      Completed: false,
+      [selected]: true,
+    }))
+
+    onFilterChange(selected)
+  }
+
   return (
     <ul className="filters">
-      <li>
-        <button onClick={() => onFilterChange('All')}>All</button>
-      </li>
-      <li>
-        <button onClick={() => onFilterChange('Active')}>Active</button>
-      </li>
-      <li>
-        <button onClick={() => onFilterChange('Completed')}>Completed</button>
-      </li>
+      {['All', 'Active', 'Completed'].map((filter) => (
+        <li key={filter}>
+          <button className={activeFilter[filter] ? 'selected' : ''} type="button" onClick={handleFilterClick}>
+            {filter}
+          </button>
+        </li>
+      ))}
     </ul>
   )
-}
-
-TasksFilter.defaultProps = {
-  onFilterChange: () => {},
 }
 
 TasksFilter.propTypes = {

@@ -1,44 +1,50 @@
-import './TaskList.css'
+import React from 'react'
 import PropTypes from 'prop-types'
 
-import Task from '../Task'
+import Task from '../Task/Task'
 
-function TaskList({ tasks, onDeleted, onToggleDone, onEditItem, onToggleTimer, formatTime }) {
-  return (
-    <ul className="todo-list">
-      {tasks.map(({ id, ...taskProps }) => (
-        <li key={id} className="todo-list-item">
-          <Task
-            {...taskProps}
-            id={id}
-            onDeleted={() => onDeleted(id)}
-            onToggleDone={() => onToggleDone(id)}
-            onEditItem={onEditItem}
-            onToggleTimer={() => onToggleTimer(id)}
-            formatTime={formatTime}
-          />
-        </li>
-      ))}
-    </ul>
-  )
-}
-
-TaskList.defaultProps = {
-  tasks: [],
-  onDeleted: () => {},
-  onToggleDone: () => {},
-  onEditItem: () => {},
-  onToggleTimer: () => {},
-  formatTime: () => '00:00',
+function TaskList({
+  tasks = [],
+  onDelete = () => {},
+  onToggleEditMode = () => {},
+  onEditTask = () => {},
+  onTogglePlay = () => {},
+  changeTitle = () => {},
+}) {
+  return tasks.map(({ description, modeEdit, created, id, valueSec, play }) => (
+    <Task
+      changeTitle={changeTitle}
+      key={id}
+      id={id}
+      description={description}
+      modeEdit={modeEdit}
+      created={created}
+      onDelete={onDelete}
+      onToggleEditMode={onToggleEditMode}
+      onEditTask={onEditTask}
+      durationMs={Number(valueSec) * 1000}
+      onTogglePlay={onTogglePlay}
+      play={play}
+    />
+  ))
 }
 
 TaskList.propTypes = {
-  tasks: PropTypes.arrayOf(PropTypes.object),
-  onDeleted: PropTypes.func,
-  onToggleDone: PropTypes.func,
-  onEditItem: PropTypes.func,
-  onToggleTimer: PropTypes.func,
-  formatTime: PropTypes.func,
+  tasks: PropTypes.arrayOf(
+    PropTypes.shape({
+      description: PropTypes.string,
+      modeEdit: PropTypes.string,
+      created: PropTypes.number,
+      id: PropTypes.number,
+      valueMin: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      valueSec: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      play: PropTypes.bool,
+    })
+  ),
+  onDelete: PropTypes.func,
+  onToggleEditMode: PropTypes.func,
+  onEditTask: PropTypes.func,
+  onTogglePlay: PropTypes.func,
 }
 
 export default TaskList

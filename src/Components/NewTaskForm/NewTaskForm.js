@@ -1,45 +1,54 @@
-import './NewTaskForm.css'
-import { Component } from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 
-export default class NewTaskForm extends Component {
-  state = {
-    description: '',
-  }
+function NewTaskForm({ onAddTask = () => {} }) {
+  const [dataTask, setDataTask] = useState({
+    taskTitle: '',
+    Min: '',
+    Sec: '',
+  })
 
-  onDescriptionChange = (e) => {
-    this.setState({
-      description: e.target.value,
+  const handleTaskChange = (e) => {
+    const { value, name } = e.target
+    setDataTask((arr) => {
+      return { ...arr, [name]: value }
     })
   }
 
-  onSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
-    this.props.onItemAdded(this.state.description)
-    this.setState({ description: '' }) // Очистка поля после отправки
+    const { taskTitle, Min, Sec } = dataTask
+    if (!taskTitle || taskTitle === ' ') {
+      return
+    }
+    onAddTask(taskTitle, Min, Sec)
+    setDataTask({
+      taskTitle: '',
+      Min: '',
+      Sec: '',
+    })
   }
 
-  render() {
-    return (
-      <header className="header">
-        <h1>Todos</h1>
-        <form onSubmit={this.onSubmit}>
-          <input
-            className="new-todo"
-            placeholder="What needs to be done?"
-            onChange={this.onDescriptionChange}
-            value={this.state.description}
-          />
-        </form>
-      </header>
-    )
-  }
-}
-
-NewTaskForm.defaultProps = {
-  onItemAdded: () => {},
+  return (
+    <form onSubmit={handleSubmit} className="new-todo-form">
+      {['taskTitle', 'Min', 'Sec'].map((elem) => (
+        <input
+          key={elem}
+          name={elem}
+          className={elem === 'taskTitle' ? 'new-todo-form__timer' : 'new-todo'}
+          placeholder={elem === 'taskTitle' ? 'Task' : `${elem}`}
+          onChange={handleTaskChange}
+          value={dataTask[elem]}
+          type={elem === 'taskTitle' ? 'text' : 'number'}
+        />
+      ))}
+      <button type="submit" style={{ display: 'none' }} aria-label="Submit task" />
+    </form>
+  )
 }
 
 NewTaskForm.propTypes = {
-  onItemAdded: PropTypes.func,
+  onAddTask: PropTypes.func.isRequired,
 }
+
+export default NewTaskForm
