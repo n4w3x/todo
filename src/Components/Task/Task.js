@@ -1,88 +1,178 @@
-import './Task.css'
+/* eslint-disable no-unused-expressions */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-restricted-globals */
+import React, { useState, useEffect, useRef } from 'react'
 import { formatDistanceToNow } from 'date-fns'
-import { Component } from 'react'
 import PropTypes from 'prop-types'
 
-export default class Task extends Component {
-  state = {
-    isEditing: false,
-    newDescription: this.props.description,
+function Task({ task, onToggle, onDelete, onEdit, onUpdate }) {
+  const { id, description, created, completed, min: taskMin, sec: taskSec, isRunning, lastSavedTime } = task
+  const [min, sec] = [taskMin || 0, taskSec || 0]
+  const [isEditing, setEditing] = useState(false)
+  const [editedDescription, setEditedDescription] = useState(description)
+  const [elapsedTime, setElapsedTime] = useState(min * 60 * 1000 + sec * 1000 || 10 * 60 * 1000)
+  const [started, setIsRunning] = useState(isRunning || false)
+  const timer = useRef(null)
+
+  const startTimer = () => {
+    timer.current = setInterval(() => {
+      setElapsedTime((prevTime) => {
+        if (prevTime > 0) {
+          return prevTime - 1000
+        }
+        onToggle(id)
+        clearInterval(timer.current)
+        timer.current = null
+        setIsRunning(false)
+        return 0
+      })
+    }, 1000)
+    setIsRunning(true)
   }
 
-  handleEditClick = () => {
-    this.setState({ isEditing: true })
+  const pauseTimer = () => {
+    clearInterval(timer.current)
+    timer.current = null
+    setIsRunning(false)
   }
 
-  handleSaveClick = () => {
-    const { onEditItem, id } = this.props
-    const { newDescription } = this.state
-
-    if (newDescription !== this.props.description) {
-      onEditItem(id, newDescription)
+  const resumeTimer = () => {
+    if (started) {
+      pauseTimer()
+    } else {
+      startTimer()
     }
-
-    this.setState({ isEditing: false })
+    setIsRunning(!started)
   }
 
-  handleChange = (event) => {
-    this.setState({ newDescription: event.target.value })
+  const handleToggle = () => {
+    onToggle(id)
   }
 
-  handleBlur = () => {
-    this.handleSaveClick()
+  const handleDelete = () => {
+    clearInterval(timer.current)
+    onDelete(id)
   }
 
-  render() {
-    const { description, created, onDeleted, onToggleDone, done, id } = this.props
-    const { isEditing, newDescription } = this.state
-    const distanceToNow = formatDistanceToNow(new Date(created), {
-      includeSeconds: true,
-    })
+  const handleEdit = () => {
+    setEditing(true)
+  }
 
-    let classNames = 'description'
-    if (done) {
-      classNames += ' done'
+  const handleSave = () => {
+    onEdit(id, editedDescription)
+    setEditing(false)
+  }
+
+  const handleCancel = () => {
+    setEditedDescription(description)
+    setEditing(false)
+  }
+
+  const handleEscapeKey = (e) => {
+    if (e.key === 'Escape') {
+      handleCancel()
     }
+  }
 
-    return (
-      <div className="task">
-        <div className="view">
-          <input className="toggle" type="checkbox" checked={done} onChange={onToggleDone} />
+  const handleDescriptionChange = (e) => {
+    setEditedDescription(e.target.value)
+  }
 
-          <label>
-            {isEditing ? (
-              <input type="text" value={newDescription} onChange={this.handleChange} onBlur={this.handleBlur} />
-            ) : (
-              <button className={classNames} onClick={onToggleDone}>
-                {description}
-              </button>
-            )}
+  useEffect(() => {
+    return () => {
+      const unmountTime = new Date()
+      const remainingMin = Math.floor(elapsedTime / 60000)
+      const remainingSec = Math.floor((elapsedTime % 60000) / 1000)
+      onUpdate(id, remainingMin, remainingSec, started, unmountTime)
+    }
+  }, [elapsedTime, started])
 
-            <span className="created">created {distanceToNow} ago</span>
-          </label>
+  useEffect(() => {
+    if (lastSavedTime && started) {
+      const now = new Date()
+      const diff = Math.floor((now - new Date(lastSavedTime)) / 1000)
+      const newElapsedTime = elapsedTime - diff * 1000
+      setElapsedTime(newElapsedTime > 0 ? newElapsedTime : 0)
+      startTimer()
+    }
+  }, [])
 
-          <button className="icon icon-edit" onClick={this.handleEditClick} />
+  useEffect(() => {
+    window.addEventListener('keydown', handleEscapeKey)
+    return () => {
+      window.removeEventListener('keydown', handleEscapeKey)
+    }
+  }, [completed])
 
-          <button className="icon icon-destroy" onClick={onDeleted} />
-        </div>
+  useEffect(() => {
+    return () => {
+      if (timer.current) {
+        clearInterval(timer.current)
+      }
+    }
+  }, [])
+
+  return (
+    <li className={completed ? 'completed' : ''}>
+      <div className="view">
+        <input className="toggle" type="checkbox" checked={completed} onChange={handleToggle} />
+        {isEditing ? (
+          <>
+            <input
+              className="edit"
+              type="text"
+              value={editedDescription}
+              onChange={handleDescriptionChange}
+              onBlur={handleCancel}
+              onKeyDown={(e) => {
+                e.key === 'Enter' && handleSave()
+                e.key === 'Escape' && handleCancel()
+              }}
+            />
+            <button className="icon icon-edit" onClick={handleCancel} />
+          </>
+        ) : (
+          <>
+            <label>
+              <span className="title">{description}</span>
+              <span className="description">
+                {!completed && (
+                  <>
+                    <button
+                      className={`icon icon-${started ? 'pause' : 'play'}`}
+                      onClick={resumeTimer}
+                      style={{ marginRight: '8px' }}
+                    />
+                    <span style={{ color: elapsedTime === 0 ? 'red' : 'inherit' }}>
+                      {`${Math.floor(elapsedTime / 60000)}:${Math.floor((elapsedTime % 60000) / 1000)}`}
+                    </span>
+                  </>
+                )}
+              </span>
+              <span className="created">{`created ${formatDistanceToNow(new Date(created.getTime()))}`}</span>
+            </label>
+            <button className="icon icon-edit" onClick={handleEdit} />
+          </>
+        )}
+        <button className="icon icon-destroy" onClick={handleDelete} />
       </div>
-    )
-  }
-}
-
-Task.defaultProps = {
-  done: false,
-  onDeleted: () => {},
-  onToggleDone: () => {},
-  onEditItem: () => {},
+    </li>
+  )
 }
 
 Task.propTypes = {
-  id: PropTypes.number.isRequired,
-  description: PropTypes.string.isRequired,
-  created: PropTypes.instanceOf(Date).isRequired,
-  onDeleted: PropTypes.func,
-  onToggleDone: PropTypes.func,
-  onEditItem: PropTypes.func,
-  done: PropTypes.bool,
+  task: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    description: PropTypes.string.isRequired,
+    created: PropTypes.instanceOf(Date).isRequired,
+    completed: PropTypes.bool.isRequired,
+    min: PropTypes.number.isRequired,
+    sec: PropTypes.number.isRequired,
+  }).isRequired,
+  onToggle: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onEdit: PropTypes.func.isRequired,
+  onUpdate: PropTypes.func.isRequired,
 }
+
+export default Task

@@ -1,28 +1,32 @@
-import './TasksFilter.css'
-import PropTypes from 'prop-types'
+import React from 'react'
 
-function TasksFilter({ onFilterChange }) {
+function TasksFilter({ activeFilter, onFilterChange }) {
+  const handleFilterChange = (filter) => {
+    onFilterChange(filter)
+  }
+
   return (
     <ul className="filters">
       <li>
-        <button onClick={() => onFilterChange('All')}>All</button>
+        <button onClick={() => handleFilterChange('all')} className={activeFilter === 'all' ? 'selected' : ''}>
+          All
+        </button>
       </li>
       <li>
-        <button onClick={() => onFilterChange('Active')}>Active</button>
+        <button onClick={() => handleFilterChange('active')} className={activeFilter === 'active' ? 'selected' : ''}>
+          Active
+        </button>
       </li>
       <li>
-        <button onClick={() => onFilterChange('Completed')}>Completed</button>
+        <button
+          onClick={() => handleFilterChange('completed')}
+          className={activeFilter === 'completed' ? 'selected' : ''}
+        >
+          Completed
+        </button>
       </li>
     </ul>
   )
-}
-
-TasksFilter.defaultProps = {
-  onFilterChange: () => {},
-}
-
-TasksFilter.propTypes = {
-  onFilterChange: PropTypes.func,
 }
 
 export default TasksFilter

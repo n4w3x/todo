@@ -1,30 +1,17 @@
-import './Footer.css'
-import PropTypes from 'prop-types'
+import React from 'react'
 
-import TasksFilter from '../TasksFilter'
+import TasksFilter from '../TasksFilter/TasksFilter'
 
-function Footer({ count, onFilterChange, clearCompleted }) {
+function Footer({ itemsLeft, onClearCompleted, activeFilter, onFilterChange }) {
   return (
     <footer className="footer">
-      <span className="todo-count">{count} items left</span>
-      <TasksFilter onFilterChange={onFilterChange} />
-      <button className="clear-completed" onClick={clearCompleted}>
+      <span className="todo-count">{`${itemsLeft} ${itemsLeft === 1 ? 'item' : 'items'} left`}</span>
+      <TasksFilter activeFilter={activeFilter} onFilterChange={onFilterChange} />
+      <button className="clear-completed" onClick={onClearCompleted}>
         Clear completed
       </button>
     </footer>
   )
-}
-
-Footer.defaultProps = {
-  count: 0,
-  onFilterChange: () => {},
-  clearCompleted: () => {},
-}
-
-Footer.propTypes = {
-  count: PropTypes.number,
-  onFilterChange: PropTypes.func,
-  clearCompleted: PropTypes.func,
 }
 
 export default Footer

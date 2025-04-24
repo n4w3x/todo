@@ -1,38 +1,15 @@
-import './TaskList.css'
-import PropTypes from 'prop-types'
+import React from 'react'
 
-import Task from '../Task'
+import Task from '../Task/Task'
 
-function TaskList({ tasks, onDeleted, onToggleDone, onEditItem }) {
+function TasksList({ tasks, onToggle, onDelete, onEdit, onUpdate }) {
   return (
     <ul className="todo-list">
-      {tasks.map(({ id, ...taskProps }) => (
-        <li key={id} className="todo-list-item">
-          <Task
-            {...taskProps}
-            id={id}
-            onDeleted={() => onDeleted(id)}
-            onToggleDone={() => onToggleDone(id)}
-            onEditItem={onEditItem}
-          />
-        </li>
+      {tasks.map((task) => (
+        <Task key={task.id} task={task} onToggle={onToggle} onDelete={onDelete} onEdit={onEdit} onUpdate={onUpdate} />
       ))}
     </ul>
   )
 }
 
-TaskList.defaultProps = {
-  tasks: [],
-  onDeleted: () => {},
-  onToggleDone: () => {},
-  onEditItem: () => {},
-}
-
-TaskList.propTypes = {
-  tasks: PropTypes.arrayOf(PropTypes.object),
-  onDeleted: PropTypes.func,
-  onToggleDone: PropTypes.func,
-  onEditItem: PropTypes.func,
-}
-
-export default TaskList
+export default TasksList

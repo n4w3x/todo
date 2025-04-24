@@ -1,45 +1,61 @@
-import './NewTaskForm.css'
-import { Component } from 'react'
-import PropTypes from 'prop-types'
+import React, { useState } from 'react'
 
-export default class NewTaskForm extends Component {
-  state = {
-    description: '',
+function NewTaskForm({ onAddTask }) {
+  const [newTask, setNewTask] = useState('')
+  const [min, setMin] = useState('')
+  const [sec, setSec] = useState('')
+
+  const handleInputChange = (e) => {
+    setNewTask(e.target.value)
   }
 
-  onDescriptionChange = (e) => {
-    this.setState({
-      description: e.target.value,
-    })
+  const handleMinChange = (e) => {
+    const numericValue = e.target.value.replace(/\D/, '')
+    setMin(numericValue)
   }
 
-  onSubmit = (e) => {
-    e.preventDefault()
-    this.props.onItemAdded(this.state.description)
-    this.setState({ description: '' }) // Очистка поля после отправки
+  const handleSecChange = (e) => {
+    const numericValue = e.target.value.replace(/\D/, '')
+    setSec(numericValue)
   }
 
-  render() {
-    return (
-      <header className="header">
-        <h1>Todos</h1>
-        <form onSubmit={this.onSubmit}>
-          <input
-            className="new-todo"
-            placeholder="What needs to be done?"
-            onChange={this.onDescriptionChange}
-            value={this.state.description}
-          />
-        </form>
-      </header>
-    )
+  const handleAddTask = (e) => {
+    if ((e.key === 'Enter' || e.type === 'click') && newTask.trim() !== '') {
+      onAddTask(newTask, min, sec)
+      setNewTask('')
+      setMin('')
+      setSec('')
+    }
   }
+
+  return (
+    <header className="header">
+      <h1>todos</h1>
+      <form className="new-todo-form">
+        <input
+          className="new-todo"
+          placeholder="Task"
+          value={newTask}
+          onChange={handleInputChange}
+          onKeyDown={handleAddTask}
+        />
+        <input
+          className="new-todo-form__timer"
+          placeholder="Min"
+          value={min}
+          onChange={handleMinChange}
+          onKeyDown={handleAddTask}
+        />
+        <input
+          className="new-todo-form__timer"
+          placeholder="Sec"
+          value={sec}
+          onChange={handleSecChange}
+          onKeyDown={handleAddTask}
+        />
+      </form>
+    </header>
+  )
 }
 
-NewTaskForm.defaultProps = {
-  onItemAdded: () => {},
-}
-
-NewTaskForm.propTypes = {
-  onItemAdded: PropTypes.func,
-}
+export default NewTaskForm
